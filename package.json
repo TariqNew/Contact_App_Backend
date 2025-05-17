@@ -14,6 +14,7 @@
     "@prisma/client": "^6.8.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-async-handler": "^1.2.0",
     "router": "^2.2.0"
   },
   "devDependencies": {
