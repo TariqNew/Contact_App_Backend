@@ -9,7 +9,7 @@ router.get('/api', getAllContacts)
 router.get('/api/:id', getSingleContact)
 
 //Create a contact
-router.post('/api/:id', createContact)
+router.post('/api', createContact)
 
 
 //Update a contact

@@ -20,7 +20,8 @@ const getSingleContact = (req,res)=>{
 //@access public
 
 const createContact = (req,res)=>{
-    res.status(200).json({'message': `The contact with id ${req.params.id} is created`})
+    const {name, email, password} = req.body
+    res.status(200).json({'message': `${name}, ${email}, ${password}`})
 }
 
 //@desc Update a contact
