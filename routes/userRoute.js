@@ -3,19 +3,24 @@ const router = express.Router();
 const {
   getAllUsers,
   getSingleUser,
-  createUser,
   updateUser,
   deleteUser,
+  registerUser,
+  loginUser,
 } = require("../controllers/userController");
+const { protect } = require("../middlewares/authmiddleware");
 
 // Fetch all users - GET /api/user/
 router.get("/", getAllUsers);
 
 // Fetch user with id - GET /api/user/:id
-router.get("/:id", getSingleUser);
+router.get("/:id", protect, getSingleUser);
 
-// Create a user - POST /api/user/
-router.post("/", createUser);
+// Register a user - POST /api/user/register
+router.post("/register", registerUser);
+
+// Authenticate a user - POST /api/user/login
+router.post("/login", loginUser);
 
 // Update a user - PUT /api/user/:id
 router.put("/:id", updateUser);
