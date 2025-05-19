@@ -1,4 +1,6 @@
 const asyncHandler = require("express-async-handler");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
@@ -29,29 +31,89 @@ const getSingleUser = asyncHandler(async (req, res) => {
   res.status(200).json(user);
 });
 
-//@desc Create a user
-//@route POST /api/users
+
+//@desc Register a user
+//@route POST /api/users/register
 //@access public
-const createUser = asyncHandler(async (req, res) => {
+const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
-  if (!name || !email || !password) {
-    res.status(400);
-    throw new Error("All fields are required");
-  }
-
+  // Check if user already exists
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) {
     res.status(400);
-    throw new Error("Email already in use");
+    throw new Error("User already exists");
   }
 
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Create user
   const user = await prisma.user.create({
-    data: { name, email, password },
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+    },
   });
 
-  res.status(201).json(user);
+  // Generate JWT token
+  const token = jwt.sign(
+    { userId: user.id },
+    process.env.JWT_SECRET || "defaultsecret",
+    { expiresIn: "1d" }
+  );
+
+  res.status(201).json({
+    message: "User registered successfully",
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  });
 });
+
+//@desc Authenticate a user
+//@route POST /api/users/login
+//@access public
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+
+  const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordMatch) {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+
+  const token = jwt.sign(
+    { userId: user.id },
+    process.env.JWT_SECRET || "defaultsecret",
+    { expiresIn: "1d" }
+  );
+
+  res.status(200).json({
+    message: "Login successful",
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+});
+
 
 //@desc Update a user
 //@route PUT /api/users/:id
@@ -97,7 +159,8 @@ const deleteUser = asyncHandler(async (req, res) => {
 module.exports = {
   getAllUsers,
   getSingleUser,
-  createUser,
+  registerUser,
+  loginUser,
   updateUser,
   deleteUser,
 };
