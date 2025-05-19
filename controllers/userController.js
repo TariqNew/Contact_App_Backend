@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 
 //@desc Fetch All Users
 //@route GET /api/users
-//@access public
+//@access private
 const getAllUsers = asyncHandler(async (req, res) => {
   const users = await prisma.user.findMany({
     include: { contacts: true },
@@ -16,7 +16,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 
 //@desc Fetch User with specific id
 //@route GET /api/users/:id
-//@access public
+//@access private
 const getSingleUser = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: parseInt(req.params.id) },
@@ -34,7 +34,7 @@ const getSingleUser = asyncHandler(async (req, res) => {
 
 //@desc Register a user
 //@route POST /api/users/register
-//@access public
+//@access private
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -77,7 +77,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 //@desc Authenticate a user
 //@route POST /api/users/login
-//@access public
+//@access private
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -117,7 +117,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
 //@desc Update a user
 //@route PUT /api/users/:id
-//@access public
+//@access private
 const updateUser = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: parseInt(req.params.id) },
@@ -138,7 +138,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
 //@desc Delete User
 //@route DELETE /api/users/:id
-//@access public
+//@access private
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: parseInt(req.params.id) },
@@ -156,6 +156,15 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.status(200).json({ message: `User with id ${req.params.id} deleted` });
 });
 
+//@desc logout a user
+//@route POST /api/user/logout
+//@access private
+const logoutUser = (req, res) => {
+  res.status(204).json({ message: 'Logged out successfully' });
+};
+
+
+
 module.exports = {
   getAllUsers,
   getSingleUser,
@@ -163,4 +172,5 @@ module.exports = {
   loginUser,
   updateUser,
   deleteUser,
+  logoutUser
 };
